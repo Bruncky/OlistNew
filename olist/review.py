@@ -18,14 +18,55 @@ class Review:
         Returns a DataFrame with:
        'review_id', 'length_review', 'review_score'
         """
-        pass  # YOUR CODE HERE
+        # $CHALLENGIFY_BEGIN
+        reviews = self.data['order_reviews']
+
+        def length_comment(d):
+            if type(d) is str:
+                return len(d)
+            else:
+                return 0
+
+        reviews.loc[:, 'length_review'] = \
+            reviews['review_comment_message'].apply(length_comment)
+
+        return reviews[['review_id', 'length_review',
+                        'review_score']]
+        # $CHALLENGIFY_END
 
     def get_main_product_category(self):
         """
         Returns a DataFrame with:
        'review_id', 'order_id','product_category_name'
         """
-        pass  # YOUR CODE HERE
+        # $CHALLENGIFY_BEGIN
+        products = self.data['products']
+        order_items = self.data['order_items']
+        reviews = self.data['order_reviews']
+
+        # Groupby category, sort and drop_duplicates
+        order_product_category = \
+            order_items.merge(products[['product_category_name',
+                                        'product_id']],
+                              on='product_id')\
+                       .groupby(['order_id', 'product_category_name'],
+                                as_index=False)\
+                       .agg({'price': 'sum'}).sort_values(by=['order_id',
+                                                              'price'],
+                                                          ascending=False)\
+                       .drop_duplicates(['order_id'])\
+                       .drop(['price'], axis=1)
+
+        return reviews.merge(order_product_category,
+                             on='order_id')[['review_id',
+                                             'order_id',
+                                             'product_category_name']]
+        # $CHALLENGIFY_END
 
     def get_training_data(self):
-        pass  # YOUR CODE HERE
+        # $CHALLENGIFY_BEGIN
+        df = self.get_review_length()\
+                 .merge(self.get_main_product_category(),
+                        on='review_id')
+        return df
+        # $CHALLENGIFY_END

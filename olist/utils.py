@@ -15,7 +15,7 @@ def haversine_distance(lon1, lat1, lon2, lat2):
     return 2 * 6371 * asin(sqrt(a))
 
 
-def return_significative_coef(model):
+def return_significant_coef(model):
     """
     Returns p_value, lower and upper bound coefficients
     from a statsmodels object.
